@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情系双溪仁 • 扬帆赴新程 | 炫彩动感欢送盛典</title>
+    <!-- 字体与图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff007f;
+            --neon-yellow: #ffe600;
+            --neon-purple: #9d00ff;
+            --bg-dark: #05050a;
+            --font-main: 'Noto Sans SC', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas 动态粒子背景 */
+        #bgCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 顶部导航控制 */
+        .top-nav {
+            z-index: 100;
+            width: 100%;
+            max-width: 850px;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            background: rgba(10, 10, 20, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-label {
+            font-size: 13px;
+            color: var(--neon-cyan);
+            font-weight: 700;
+            text-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        select, button {
+            background: rgba(0, 243, 255, 0.1);
+            color: #fff;
+            border: 1px solid var(--neon-cyan);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: var(--font-main);
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, button:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        select option {
+            background: #0a0a14;
+            color: #fff;
+        }
+
+        /* 主舞台 */
+        .stage-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            height: 680px;
+            perspective: 1000px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 480px) {
+            .stage-container {
+                width: 92vw;
+                height: 145vw;
+                max-height: 650px;
+            }
+        }
+
+        /* 动感卡片主体 */
+        .animated-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: rgba(15, 15, 30, 0.85);
+            backdrop-filter: blur(25px);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 35px rgba(0, 243, 255, 0.35), inset 0 0 20px rgba(255, 0, 127, 0.25);
+            padding: 28px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8) rotateY(-30deg);
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .animated-card.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1) rotateY(0deg);
+        }
+
+        /* 闪烁与发光字效 */
+        .glow-cyan {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+            animation: pulseGlow 1.8s infinite alternate;
+        }
+
+        .glow-pink {
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink);
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+
+        .glow-yellow {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow), 0 0 20px var(--neon-yellow);
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.8; filter: drop-shadow(0 0 5px currentColor); }
+            100% { opacity: 1; filter: drop-shadow(0 0 18px currentColor); }
+        }
+
+        .blink-fast {
+            animation: blinker 0.8s infinite alternate;
+        }
+
+        .blink-slow {
+            animation: blinker 1.6s infinite alternate;
+        }
+
+        @keyframes blinker {
+            0% { opacity: 0.2; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* 彩虹大标题 */
+        .hero-title {
+            font-size: 34px;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.25;
+            margin: 10px 0;
+            background: linear-gradient(90deg, #00f3ff, #ff007f, #ffe600, #00f3ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbowFlow 4s ease infinite;
+        }
+
+        @keyframes rainbowFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 主角卡片 */
+        .honorees-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin: 12px 0;
+        }
+
+        .honoree-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            animation: floatUpDown 3s ease-in-out infinite alternate;
+        }
+
+        .honoree-card:nth-child(2) {
+            animation-delay: 1.5s;
+            border-color: rgba(255, 0, 127, 0.4);
+        }
+
+        @keyframes floatUpDown {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-6px); }
+        }
+
+        .honoree-name {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .badge-dynamic {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-cyan {
+            background: rgba(0, 243, 255, 0.2);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .badge-pink {
+            background: rgba(255, 0, 127, 0.2);
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        /* 敬呈机构框 */
+        .recipient-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--neon-yellow);
+            box-shadow: 0 0 15px rgba(255, 230, 0, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        /* 翻页控制栏 */
+        .controls-bar {
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .dot-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot-indicator.active {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 12px var(--neon-cyan);
+            transform: scale(1.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 动态背景 Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- 顶部选择与控制 -->
+    <nav class="top-nav">
+        <div>
+            <span class="nav-label"><i class="fa-solid fa-paper-plane blink-fast"></i> 发送单位：</span>
+            <select id="recipientSelect" onchange="switchRecipient(this.value)">
+                <option value="0">全体家协理事</option>
+                <option value="1">全体董事成员</option>
+                <option value="2">全体校友会理事</option>
+                <option value="3">尊敬的嘉宾 / 贵宾</option>
+            </select>
+        </div>
+
+        <button id="musicToggle" onclick="toggleAudio()">
+            <i class="fa-solid fa-compact-disc fa-spin" id="musicIcon" style="color: var(--neon-cyan);"></i>
+            <span id="musicStatus">开启动感音乐</span>
+        </button>
+    </nav>
+
+    <!-- 主舞台（2页） -->
+    <main class="stage-container">
+
+        <!-- ================= 第一页：主视觉封面 ================= -->
+        <div class="animated-card active" id="page1">
+            <div style="text-align: center;">
+                <div style="font-size: 13px; color: var(--neon-cyan); letter-spacing: 3px; font-weight: 900;" class="blink-slow">
+                    <i class="fa-solid fa-star"></i> 双溪仁国民型华文小学 <i class="fa-solid fa-star"></i>
+                </div>
+                <div style="font-size: 12px; color: #aaa; margin-top: 4px;">欢送盛典邀请函</div>
+            </div>
+
+            <div style="text-align: center;">
+                <h1 class="hero-title">情系双溪仁<br>扬帆赴新程</h1>
+                <div style="font-size: 26px; margin-top: 8px;" class="glow-pink blink-fast">
+                    <i class="fa-solid fa-trophy"></i> &nbsp; <i class="fa-solid fa-award"></i> &nbsp; <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+
+            <!-- 主角 -->
+            <div class="honorees-wrapper">
+                <div class="honoree-card">
+                    <div>
+                        <div class="honoree-name glow-cyan">锺运贤 副校长</div>
+                        <div style="font-size: 11px; color: #ccc;">倾情奉献 • 荣升新阶</div>
+                    </div>
+                    <span class="badge-dynamic badge-cyan blink-fast"><i class="fa-solid fa-award"></i> 荣升校长</span>
+                </div>
+
+                <div class="honoree-card">
+                    <div>
+                        <div class="honoree-name glow-pink">诺雅琳 老师</div>
+                        <div style="font-size: 11px; color: #ccc;">默默耕耘 • 开启新篇</div>
+                    </div>
+                    <span class="badge-dynamic badge-pink blink-fast"><i class="fa-solid fa-paper-plane"></i> 调任新职</span>
+                </div>
+            </div>
+
+            <!-- 动态敬呈单位 -->
+            <div class="recipient-box">
+                <div style="font-size: 11px; color: var(--neon-yellow); margin-bottom: 4px;" class="blink-slow">
+                    <i class="fa-solid fa-envelope"></i> 诚邀
+                </div>
+                <div style="font-size: 17px; font-weight: 900; color: #fff;" id="coverRecipientText">
+                    全体家协理事
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: auto;">
+                <p class="hero-title" style="font-size: 18px;">“感恩相遇 • 珍藏回忆 • 祝福前程”</p>
+            </div>
+        </div>
+
+        <!-- ================= 第二页：观礼邀请函详情 ================= -->
+        <div class="animated-card" id="page2">
+            <div style="text-align: center;">
+                <div style="font-size: 13px; color: var(--neon-cyan); letter-spacing: 3px; font-weight: 900;" class="blink-slow">
+                    <i class="fa-solid fa-star"></i> 双溪仁国民型华文小学 <i class="fa-solid fa-star"></i>
+                </div>
+                <h2 class="hero-title" style="font-size: 32px; margin-top: 5px;">观礼邀请函</h2>
+            </div>
+
+            <div style="font-size: 17px; font-weight: 900; color: var(--neon-yellow); text-align: center;" id="greetingRecipientText">
+                致：全体家协理事
+            </div>
+
+            <p style="font-size: 14px; line-height: 1.85; color: #e0e0e0; text-indent: 28px;">
+                教泽绵长，桃李芬芳。本校<strong>锺运贤副校长</strong>荣升校长，以及<strong>诺雅琳老师</strong>调任新职。二位老师倾注心血，育人无数。今特设欢送盛典，诚邀 阁下莅临观礼，共叙情谊，并致最崇高之祝福。
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; background: rgba(255,255,255,0.03); padding: 18px; border-radius: 12px; border: 1px solid rgba(0,243,255,0.2);">
+                <div style="display:flex; align-items:center; gap:12px;" class="glow-cyan">
+                    <i class="fa-regular fa-calendar-check" style="font-size: 22px;"></i>
+                    <div style="font-size: 15px;"><strong>盛典日期：</strong>2026年9月11日（星期五）</div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px;" class="glow-pink">
+                    <i class="fa-regular fa-clock" style="font-size: 22px;"></i>
+                    <div style="font-size: 15px;"><strong>盛典时间：</strong>上午 10:30 至 中午 12:30</div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px;" class="glow-yellow">
+                    <i class="fa-solid fa-location-dot" style="font-size: 22px;"></i>
+                    <div style="font-size: 15px;"><strong>盛典地点：</strong>学校礼堂</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: auto; padding-bottom: 10px;">
+                <p style="font-size: 14px; color: var(--neon-cyan); letter-spacing: 2px;" class="blink-slow">
+                    <i class="fa-solid fa-heart"></i> 恭候 阁下光临盛会 <i class="fa-solid fa-heart"></i>
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 底部控制栏 -->
+    <div class="controls-bar">
+        <button onclick="prevPage()"><i class="fa-solid fa-chevron-left"></i> 第一页</button>
+        <div style="display: flex; gap: 10px;">
+            <div class="dot-indicator active" onclick="goToPage(1)"></div>
+            <div class="dot-indicator" onclick="goToPage(2)"></div>
+        </div>
+        <button onclick="nextPage()">第二页 <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <script>
+        // 1. Canvas 动态背景
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particleList = [];
+        const colors = ['#00f3ff', '#ff007f', '#ffe600', '#9d00ff'];
+
+        for (let i = 0; i < 65; i++) {
+            particleList.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 3 + 1,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: (Math.random() - 0.5) * 1.2,
+                alpha: Math.random() * 0.8 + 0.2,
+                growing: Math.random() > 0.5
+            });
+        }
+
+        function drawBackgroundAnimation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particleList.length; i++) {
+                let p = particleList[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                if (p.growing) {
+                    p.alpha += 0.01;
+                    if (p.alpha >= 0.9) p.growing = false;
+                } else {
+                    p.alpha -= 0.01;
+                    if (p.alpha <= 0.2) p.growing = true;
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+
+                for (let j = i + 1; j < particleList.length; j++) {
+                    let p2 = particleList[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 110) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = p.color;
+                        ctx.globalAlpha = (1 - dist / 110) * 0.3;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(drawBackgroundAnimation);
+        }
+        drawBackgroundAnimation();
+
+        // 2. 发送单位数据
+        const recipients = [
+            {
+                cover: "全体家协理事",
+                greeting: "致：全体家协理事"
+            },
+            {
+                cover: "全体董事成员",
+                greeting: "致：全体董事成员"
+            },
+            {
+                cover: "全体校友会理事",
+                greeting: "致：全体校友会理事"
+            },
+            {
+                cover: "尊敬的嘉宾 / 贵宾",
+                greeting: "致：尊敬的嘉宾 / 贵宾"
+            }
+        ];
+
+        function switchRecipient(idx) {
+            const data = recipients[idx];
+            document.getElementById("coverRecipientText").innerHTML = data.cover;
+            document.getElementById("greetingRecipientText").innerText = data.greeting;
+        }
+
+        // 3. 翻页逻辑
+        let currentPage = 1;
+        const maxPage = 2;
+
+        function updatePageDisplay() {
+            for(let i=1; i<=maxPage; i++) {
+                const card = document.getElementById(`page${i}`);
+                if(i === currentPage) {
+                    card.classList.add("active");
+                } else {
+                    card.classList.remove("active");
+                }
+            }
+
+            const dots = document.querySelectorAll(".dot-indicator");
+            dots.forEach((dot, idx) => {
+                if(idx + 1 === currentPage) {
+                    dot.classList.add("active");
+                } else {
+                    dot.classList.remove("active");
+                }
+            });
+        }
+
+        function nextPage() {
+            currentPage = (currentPage % maxPage) + 1;
+            updatePageDisplay();
+        }
+
+        function prevPage() {
+            currentPage = (currentPage - 2 + maxPage) % maxPage + 1;
+            updatePageDisplay();
+        }
+
+        function goToPage(p) {
+            currentPage = p;
+            updatePageDisplay();
+        }
+
+        // 4. 背景音效控制
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let audioTimer = null;
+
+        function toggleAudio() {
+            const btn = document.getElementById("musicToggle");
+            const status = document.getElementById("musicStatus");
+
+            if (!isAudioPlaying) {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                isAudioPlaying = true;
+                playDynamicBeats();
+                btn.style.borderColor = "var(--neon-pink)";
+                status.innerText = "音乐播放中";
+            } else {
+                isAudioPlaying = false;
+                clearTimeout(audioTimer);
+                btn.style.borderColor = "var(--neon-cyan)";
+                status.innerText = "开启动感音乐";
+            }
+        }
+
+        const upbeatNotes = [261.63, 329.63, 392.00, 523.25, 659.25];
+
+        function playNote(freq, timeOffset, duration = 0.35) {
+            if (!audioCtx || !isAudioPlaying) return;
+            setTimeout(() => {
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + duration);
+                } catch(e){}
+            }, timeOffset);
+        }
+
+        function playDynamicBeats() {
+            if (!isAudioPlaying) return;
+
+            playNote(upbeatNotes[0], 0);
+            playNote(upbeatNotes[2], 200);
+            playNote(upbeatNotes[3], 400);
+            playNote(upbeatNotes[4], 600);
+
+            audioTimer = setTimeout(playDynamicBeats, 1200);
+        }
+    </script>
+</body>
+</html>
